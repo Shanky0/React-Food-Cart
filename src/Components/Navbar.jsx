@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -16,6 +16,7 @@ import Button from '@mui/material/Button';
 import CartCard from './cartCard';
 import Cards from './Cards';
 import data from './test.json';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -29,7 +30,7 @@ const Navbar = (props) => {
     var [cart, setCart] = useState(arr);
     var [items, setItems] = useState(0);
 
-
+    const navigate = useNavigate();
     const { window } = props;
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const navItems = ['Break Your Fast', 'Time for Lunch', 'Can I have Snacks', 'Dinner', 'Burger and Beverages', 'More..'];
@@ -39,17 +40,36 @@ const Navbar = (props) => {
     };
 
     const addToCart = (e) => {
-        const id = Number(e.target.closest(".cardContainer").id);
 
-        data.forEach((val) => {
-            if (val.id === id) {
-                arr.push(val);
+        const id = Number(e.target.closest(".cardContainer").id);
+        let flag = true;
+        if (e.target.tagName === "BUTTON") {
+            cart.forEach((val) => {
+                if (val.id === id) {
+                    flag = false;
+                    val.quantity++;
+                    val.totalPrice += val.price;
+                    setTotalBalance(totalBalance => Number(totalBalance) + val.price)
+                }
+            });
+            if (flag) {
+                data[id - 1].quantity++;
+                data[id - 1].totalPrice += data[id - 1].price;
+                arr.push(data[id - 1]);
                 setCart(arr);
                 setItems(items => items + 1);
+                setTotalBalance(totalBalance => Number(totalBalance) + data[id - 1].price)
             }
-        });
-
+        }
     }
+
+    const empty = () => {
+        arr = [];
+        setCart([]);
+        setItems(0)
+        setTotalBalance(0);
+    }
+
 
     const popUp = () => {
         document.querySelector("#cartDisplay").classList.toggle('active');
@@ -58,6 +78,9 @@ const Navbar = (props) => {
         document.querySelector('#pop').style = "font-size:4vh;color:red;padding:1vh 2vh;border:1px solid black;cursor:pointer;margin-left:4vh";
     }
 
+    const checkout = () => {
+        navigate('/checkout');
+    }
 
 
     const drawer = (
@@ -78,14 +101,10 @@ const Navbar = (props) => {
         </Box>
     );
 
-
-
-
-
     const container = window !== undefined ? () => window().document.body : undefined;
     return (
         <>
-            <Box sx={{ height: "100vh", maxHeight: "100vh" }}>
+            <Box sx={{ height: "90vh", maxHeight: "92vh", marginBottom: "3vh" }}>
                 <AppBar component="nav" sx={{ backgroundColor: "#eee" }} >
                     <Toolbar>
                         <IconButton
@@ -117,34 +136,36 @@ const Navbar = (props) => {
                             keepMounted: true, // Better open performance on mobile.
                         }}
                         sx={{
-                            display: { sm: 'block', md: 'none' },
-                            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                            display: { sm: 'block', md: 'none' }, 
+                            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
                         }}
                     >
                         {drawer}
                     </Drawer>
                 </Box>
+                <h1 style={{marginTop:"17vh",fontSize:"5vh",color:"tomato",textAlign:"center"}}> Our Menu </h1>
                 <div id="cardDisplay" onClick={addToCart}>
-                    {data.map((val) => {
-                        return <Cards id={val.id} name={val.name} src={val.photograph} type={val.type} price={val.price} />
+                    {data.map((val, index) => {
+                        return <Cards key={index} id={val.id} name={val.name} src={val.photograph} type={val.type} price={val.price} />
                     })}
                 </div>
                 <div id='cartDisplay'>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: "#eee", boxSizing: "border-box", width: "100%" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: "#eee", boxSizing: "border-box", width: "100%", height: "fit-content", maxHeight: "15vh" }}>
                         <div id="pop" style={{ width: "10%" }} onClick={popUp}>
-                            <i class="fa-solid fa-angles-up" style={{ fontSize: "4vh", color: "red", padding: "1vh 2vh", border: "1px solid black", cursor: "pointer", marginLeft: "4vh" }} />
+                            <i class="fa-solid fa-angles-up" style={{ fontSize: "2vw", color: "red", padding: "1vh 2vh", border: "1px solid black", cursor: "pointer", marginLeft: "4vh" }} />
                         </div>
-                        <div id='details' style={{ display: "flex", justifyContent: "space-evenly", width: "80%" }}>
+                        <div id='details' style={{ display: "flex", justifyContent: "space-evenly", width: "80%", alignItems: "center", fontSize: "1vw" }}>
                             <h1> Your Orders ( {items}) </h1>
                             <h1> Subtotal : ₹ {totalBalance}</h1>
-                            <button style={{ backgroundColor: "red", color: "white", padding: "1vh 2vh", fontSize: "2.5vh" }}>Checkout</button>
+                            <button style={{ backgroundColor: "tomato", color: "white", padding: ".5vw 2vw", fontSize: "1.5vw", cursor: "pointer" }} onClick={checkout}>Checkout</button>
+                            <button style={{ backgroundColor: "red", color: "white", padding: ".5vw 2vw", fontSize: "1.5vw", cursor: "pointer" }} onClick={empty}>Empty Cart</button>
                         </div>
                     </div>
 
-                    <div id='cartList' style={{ borderTop: "1px solid black", }}>
-                        {cart.map((val) => {
+                    <div id='cartList'>
+                        {cart.map((val, index) => {
                             return (
-                                <CartCard  id={val.id} name={val.name} src={val.photograph} type={val.type} price={val.price} />
+                                <CartCard key={index} id={val.id} name={val.name} src={val.photograph} type={val.type} totalPrice={val.totalPrice} quantity={val.quantity} totalBalance={totalBalance} setTotalBalance={setTotalBalance} arr={arr} setItems={setItems} />
                             )
                         })}
                     </div>

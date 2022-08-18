@@ -1,8 +1,8 @@
 #cardDisplay {
     width: 80vw;
     margin: auto;
-    margin-top: 10vh;
-    height: 80vh;
+    margin-top: 3vh;
+    height: 67vh;
     max-height: 80vh;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -21,16 +21,17 @@
     left: 5%;
     background-color: white;
     border: 1px solid;
-    height: 8vh;
+    height: fit-content;
 }
 
 #cartDisplay.active {
     position: absolute;
     z-index: 1000;
-    top: 25%;
+    top: 20%;
     bottom: 0;
     left: 5%;
     width: 90%;
+    height: 80vh;
     background-color: white;
     border: 1px solid;
 }
@@ -39,9 +40,25 @@
     max-height: 70vh;
     grid-template-columns: 1fr 1fr;
     width: 90%;
+    margin: auto;
     gap: 3rem;
     overflow-y: scroll;
 }
 #cartList::-webkit-scrollbar {
     display: none;
+}
+
+@media screen and (max-width:1000px) {
+
+    #cardDisplay {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    #cartList{
+        display: grid;
+        max-height: 70vh;
+        grid-template-columns: 1fr;
+    }
 }
